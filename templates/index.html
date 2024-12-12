@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIR Model Simulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #f7f8f9, #d9e4f5);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+
+        div {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        label {
+            font-weight: 500;
+            margin-right: 10px;
+            color: #555;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 300px;
+            height: 10px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4a90e2;
+            cursor: pointer;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+        }
+
+        span {
+            font-size: 1.2em;
+            color: #4a90e2;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #357abd;
+        }
+
+        #plot {
+            width: 80%;
+            max-width: 600px;
+            margin-top: 20px;
+            border: 5px solid #4a90e2;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            input[type="range"] {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>SIR Model Simulation</h1>
+    <div>
+        <label for="beta">Transmission Rate (beta):</label>
+        <input type="range" id="beta" min="0.1" max="1.0" step="0.1" value="0.3">
+        <span id="beta-value">0.3</span>
+    </div>
+    <div>
+        <label for="gamma">Recovery Rate (gamma):</label>
+        <input type="range" id="gamma" min="0.05" max="0.5" step="0.05" value="0.1">
+        <span id="gamma-value">0.1</span>
+    </div>
+    <button id="update-plot">Update Plot</button>
+    <div>
+        <img id="plot" src="" alt="SIR Plot">
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            function updateValues() {
+                $("#beta-value").text($("#beta").val());
+                $("#gamma-value").text($("#gamma").val());
+            }
+
+            updateValues();
+
+            $("input[type='range']").on("input", updateValues);
+
+            $("#update-plot").on("click", function () {
+                const beta = $("#beta").val();
+                const gamma = $("#gamma").val();
+
+                $.ajax({
+                    url: "/update",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ beta: beta, gamma: gamma }),
+                    success: function (response) {
+                        $("#plot").attr("src", "data:image/png;base64," + response.plot_url);
+                    }
+                });
+            });
+
+            // Load the initial plot
+            $("#update-plot").click();
+        });
+    </script>
+</body>
+</html>
